@@ -1,0 +1,41 @@
+from PIL import Image, ImageFile
+
+def load_image(image_path):
+    return Image.open(image_path)
+
+def crop_image(image, top_crop, bottom_crop,left_crop, right_crop):
+    width, height = image.size
+    return image.crop((left_crop, top_crop, width-right_crop, height - bottom_crop))
+
+def split_image_into_parts(image, number_of_parts=5):
+    width, height = image.size
+    part_size = width // number_of_parts
+    images = []
+
+    for i in range(number_of_parts):
+        left = i * part_size
+        right = left + part_size if i < number_of_parts - 1 else width
+        cropped_part = image.crop((left, 0, right, height))
+        images.append(cropped_part)
+
+    return images
+
+# Augmenter la limite de taille d'image
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+Image.MAX_IMAGE_PIXELS = None  # Enlève la limite de la taille de l'image
+
+
+# Chemin de votre image
+image_path = 'test.jpg'
+image = load_image(image_path)
+
+# Rogner l'image
+cropped_image = crop_image(image, 4800, 1100, 200, 200) #px gauche, px haut, px droit, px bas
+
+
+# Découper l'image en 5 parties
+parts = split_image_into_parts(cropped_image)
+
+# Sauvegarder chaque partie
+for i, part in enumerate(parts):
+    part.save(f'part_{i}.png')
